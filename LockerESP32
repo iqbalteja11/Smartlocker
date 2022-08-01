@@ -1,0 +1,135 @@
+#include <WiFi.h>
+#include <ESP32Servo.h>
+#include <HTTPClient.h>
+
+#define RELAY_PIN  12
+#define RELAY_PIN2 17
+#define RELAY_PIN3 21
+#define RELAY_PIN4 32
+
+const char* ssid = "locker";
+const char* password = "iotlock123";
+//const char *host = "192.168.4.2";
+WiFiServer server(80);
+
+String header;
+
+String valueString = String(5);
+int dat_val = 0;
+int pos1 = 0;
+int pos2 = 0;
+//String valueString2 = String(5);
+//int dat_val2 = 0;
+//int pos3 = 0;
+//int pos4 = 0;
+
+unsigned long currentTime = millis();
+unsigned long previousTime = 0;
+const long timeoutTime = 2000;
+long duration, distance;
+unsigned long timeout;
+int value = 0;
+unsigned long lastTime = 0;
+unsigned long timerDelay = 100000;
+String serverName = "http://192.168.4.2:8000/";
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(RELAY_PIN2, OUTPUT);
+  pinMode(RELAY_PIN3, OUTPUT);
+  pinMode(RELAY_PIN4, OUTPUT);
+    
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.softAP(ssid, password);
+
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP);
+  server.begin();
+}  
+
+void loop() {
+  WiFiClient client = server.available();
+  if (client) {
+    currentTime = millis();
+    previousTime = currentTime;
+    Serial.println("New Client.");
+    String currentLine = "";
+    while (client.connected() && currentTime - previousTime <= timeoutTime) {
+      currentTime = millis();
+      if (client.available()) {
+        char c = client.read();
+        Serial.write(c);
+        header += c;
+        if (c == '\n') {
+          if (currentLine.length() == 0) {
+
+            if (header.indexOf("GET /?value=") >= 0) {
+              pos1 = header.indexOf('=');
+              pos2 = header.indexOf('&');
+//              pos3 = header.indexOf('=');
+//              pos4 = header.indexOf('&');
+              valueString = header.substring(pos1 + 1, pos2);
+//              valueString2 = header.substring(pos3 + 1, pos4);
+
+              dat_val = valueString.toInt();
+//              dat_val2 = valueString2.toInt();
+              if (dat_val == 0) {
+                  digitalWrite(RELAY_PIN, LOW);  // unlock the door
+                  Serial.println("Low");
+                  delay(4000);
+                Serial.println('open');
+              }else if (dat_val == 180){
+                  digitalWrite(RELAY_PIN, HIGH);
+                  Serial.println("High");// lock the door
+                  delay(4000);
+                Serial.println('close');
+              }else if (dat_val == 10) {
+                  digitalWrite(RELAY_PIN2, LOW);  // unlock the door
+                  Serial.println("Low");
+                  delay(4000);
+                Serial.println('open');
+              }else if (dat_val == 170){
+                  digitalWrite(RELAY_PIN2, HIGH);
+                  Serial.println("High");// lock the door
+                  delay(4000);
+                Serial.println('close');
+              }else if (dat_val == 20) {
+                  digitalWrite(RELAY_PIN3, LOW);  // unlock the door
+                  Serial.println("Low");
+                  delay(4000);
+                Serial.println('open');
+              }else if (dat_val == 160){
+                  digitalWrite(RELAY_PIN3, HIGH);
+                  Serial.println("High");// lock the door
+                  delay(4000);
+                Serial.println('close');
+              }else if (dat_val == 30) {
+                  digitalWrite(RELAY_PIN4, LOW);  // unlock the door
+                  Serial.println("Low");
+                  delay(4000);
+                Serial.println('open');
+              }else if (dat_val == 150){
+                  digitalWrite(RELAY_PIN4, HIGH);
+                  Serial.println("High");// lock the door
+                  delay(4000);
+                Serial.println('close');
+              }
+            }
+//            break;
+          } else {
+            currentLine = "";
+          }
+        } else if (c != '\r') {
+          currentLine += c;
+        }
+      }
+    }
+    header = "";
+    client.stop();
+    Serial.println("Client disconnected.");
+    Serial.println("");
+  }
+}
