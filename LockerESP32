@@ -1,11 +1,11 @@
 #include <WiFi.h>
-#include <ESP32Servo.h>
+//#include <ESP32Servo.h>
 #include <HTTPClient.h>
 
-#define RELAY_PIN  12
-#define RELAY_PIN2 17
-#define RELAY_PIN3 21
-#define RELAY_PIN4 32
+#define RELAY_PIN  21
+#define RELAY_PIN2 19
+#define RELAY_PIN3 17
+#define RELAY_PIN4 15
 
 const char* ssid = "locker";
 const char* password = "iotlock123";
@@ -18,10 +18,6 @@ String valueString = String(5);
 int dat_val = 0;
 int pos1 = 0;
 int pos2 = 0;
-//String valueString2 = String(5);
-//int dat_val2 = 0;
-//int pos3 = 0;
-//int pos4 = 0;
 
 unsigned long currentTime = millis();
 unsigned long previousTime = 0;
@@ -39,6 +35,11 @@ void setup() {
   pinMode(RELAY_PIN2, OUTPUT);
   pinMode(RELAY_PIN3, OUTPUT);
   pinMode(RELAY_PIN4, OUTPUT);
+
+  digitalWrite(RELAY_PIN, LOW);
+  digitalWrite(RELAY_PIN2, LOW);
+  digitalWrite(RELAY_PIN3, LOW);
+  digitalWrite(RELAY_PIN4, LOW);
     
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -69,52 +70,48 @@ void loop() {
             if (header.indexOf("GET /?value=") >= 0) {
               pos1 = header.indexOf('=');
               pos2 = header.indexOf('&');
-//              pos3 = header.indexOf('=');
-//              pos4 = header.indexOf('&');
               valueString = header.substring(pos1 + 1, pos2);
-//              valueString2 = header.substring(pos3 + 1, pos4);
 
               dat_val = valueString.toInt();
-//              dat_val2 = valueString2.toInt();
               if (dat_val == 0) {
-                  digitalWrite(RELAY_PIN, LOW);  // unlock the door
+                  digitalWrite(RELAY_PIN, LOW);  // LOCK
                   Serial.println("Low");
-                  delay(4000);
+                  delay(1000);
                 Serial.println('open');
               }else if (dat_val == 180){
                   digitalWrite(RELAY_PIN, HIGH);
-                  Serial.println("High");// lock the door
-                  delay(4000);
+                  Serial.println("High");// UNLOCK
+                  delay(1000);
                 Serial.println('close');
               }else if (dat_val == 10) {
-                  digitalWrite(RELAY_PIN2, LOW);  // unlock the door
+                  digitalWrite(RELAY_PIN2, LOW);  // LOCK
                   Serial.println("Low");
-                  delay(4000);
+                  delay(1000);
                 Serial.println('open');
               }else if (dat_val == 170){
                   digitalWrite(RELAY_PIN2, HIGH);
-                  Serial.println("High");// lock the door
-                  delay(4000);
+                  Serial.println("High");// UNLOCK
+                  delay(1000);
                 Serial.println('close');
               }else if (dat_val == 20) {
-                  digitalWrite(RELAY_PIN3, LOW);  // unlock the door
+                  digitalWrite(RELAY_PIN3, LOW);  // LOCK
                   Serial.println("Low");
-                  delay(4000);
+                  delay(1000);
                 Serial.println('open');
               }else if (dat_val == 160){
                   digitalWrite(RELAY_PIN3, HIGH);
-                  Serial.println("High");// lock the door
-                  delay(4000);
+                  Serial.println("High");// UNLOCK
+                  delay(1000);
                 Serial.println('close');
               }else if (dat_val == 30) {
-                  digitalWrite(RELAY_PIN4, LOW);  // unlock the door
+                  digitalWrite(RELAY_PIN4, LOW);  // LOCK
                   Serial.println("Low");
-                  delay(4000);
+                  delay(1000);
                 Serial.println('open');
               }else if (dat_val == 150){
                   digitalWrite(RELAY_PIN4, HIGH);
-                  Serial.println("High");// lock the door
-                  delay(4000);
+                  Serial.println("High");// UNLOCK
+                  delay(1000);
                 Serial.println('close');
               }
             }
